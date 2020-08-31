@@ -14,9 +14,17 @@ router.post('/register',async (req, res, next)=>{
         let user_exist = await User.findOne({'email':email});
        
         if(user_exist){
-            res.status(404).json({
-                msg:"Email Already used"
-            })
+            let checkAuth = await Auth.findOne({'email':email});
+            if(checkAuth){
+                res.status(404).json({
+                    msg:"Email Already used! Enter Otp"
+                }) 
+            }else{
+                res.status(404).json({
+                    msg:"Email Already used"
+                })
+            }
+           
         }else{
             user = new User()
             user.username = username
@@ -53,17 +61,14 @@ router.get('/verify/', async (req, res) => {
 
     console.log(email)
     const acc = await Auth.findOne({'email':email})
-    console.log(acc.code)
-    if(!(acc.code == code)){
-        res.status(400).json({
-            msg:'Otp is incorrect'
-        })
-    }
    
-
-    await Auth.findOneAndDelete({'code':code})
-    await User.findOneAndUpdate({'email':email}, {'isVerified':true})
-    return res.json({'message' : 'Account has verified'})
+    if(!(acc.code == code)){
+        return res.json({msg:'otp is incorrect'})
+    }else{
+        await Auth.findOneAndDelete({'email':email})
+        await User.findOneAndUpdate({'email':email}, {'isVerified':true})
+        return res.json({'message' : 'Account has verified'})
+    }
 })
 
 
