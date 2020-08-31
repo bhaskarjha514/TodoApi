@@ -39,19 +39,23 @@ router.post('/register',async (req, res, next)=>{
                 
             msg = mailer.mailer(email, code)
             if(msg){
-                return res.json({'message' : 'Cannot Send activation mail ! Check your email and try again'})
+                return res.status(400).json({'message' : 'Cannot Send activation mail ! Check your email and try again'})
             }
             await user.save(async (err, response) => {
-                if (err) return res.json({ 'message': 'Server Fucked Up 😑😢' })
+                if (err) return res.status(400).json({ 'message': 'Server Fucked Up 😑😢' })
                 await authData.save((err, response) => { 
-                    if (err) return res.json({'message':'server fucked up'})
-                        return res.json({'message':'otp has been send to email'})
+                    if (err) return res.status(400).json({'message':'server fucked up'})
+                        return res.status(201).json({'message':'otp has been send to email'})
                     })
                })
         }
 
     }catch(err){
         console.log(err)
+        res.status(500).json({
+            success: false,
+            msg:'server error'
+        })
     }    
 })
 
@@ -63,14 +67,46 @@ router.get('/verify/', async (req, res) => {
     const acc = await Auth.findOne({'email':email})
    
     if(!(acc.code == code)){
-        return res.json({msg:'otp is incorrect'})
+        return res.status(400).json({msg:'otp is incorrect'})
     }else{
         await Auth.findOneAndDelete({'email':email})
         await User.findOneAndUpdate({'email':email}, {'isVerified':true})
-        return res.json({'message' : 'Account has verified'})
+        return res.status(201).json({'message' : 'Account has verified'})
     }
 })
 
+router.post('/login', async (req, res, next)=>{
+    const email = req.body.email
+    const password = req.body.password
+
+    try{
+        let user = await User.findOne({'email':email})
+        if(!user){
+            res.status(400).json({
+                success: false,
+                msg: "Email not Registered"
+            })
+        }else{
+            const isVerified = await user.isVerified
+            if(!isVerified){
+                res.status(400).json({success:false, msg:'Email is not verified'})
+            }else{
+                const isMatch = await bcryptjs.compare(password,user.password)
+                if(!isMatch){
+                    return res.status(400).json({success:false, msg:'wrong password'})
+                }else{
+                    return res.status(201).json({success:true, msg:'successfully login'})
+                }
+            }
+        }
+    }catch(err){
+        console.log(err)
+        res.status(500).json({
+            success: false,
+            msg:'server error'
+        })
+    }
+})
 
 
 function generateOTP() { 
