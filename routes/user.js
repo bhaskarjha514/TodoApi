@@ -39,13 +39,13 @@ router.post('/register',async (req, res, next)=>{
                 
             msg = mailer.mailer(email, code)
             if(msg){
-                return res.status(400).json({'message' : 'Cannot Send activation mail ! Check your email and try again'})
+                return res.json({'message' : 'Cannot Send activation mail ! Check your email and try again'})
             }
             await user.save(async (err, response) => {
-                if (err) res.status(500).json({ 'message': 'Server Fucked Up 😑😢' })
+                if (err) return res.json({ 'message': 'Server Fucked Up 😑😢' })
                 await authData.save((err, response) => { 
-                    if (err) res.status(500).json({ 'message': 'Server Fucked Up 😑😢' })
-                        res.status(201).json({ 'message': 'SignUp successful', 'User': user })
+                    if (err) return res.json({'message':'server fucked up'})
+                        return res.json({'message':'otp has been send to email'})
                     })
                })
         }
