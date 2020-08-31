@@ -11,9 +11,11 @@ router.post('/register',async (req, res, next)=>{
     const {username, email, password} = req.body
     let code = generateOTP()
     try{
-        let user_exist = await User.findOne({email:email});
+        let user_exist = await User.findOne({'email':email});
         if(user_exist){
+            console.log(user_exist)
             res.status(404).json({
+                
                 msg:"Email Already used"
             })
         }
@@ -51,14 +53,14 @@ router.get('/verify/', async (req, res) => {
     const email = req.query.email
 
     console.log(email)
-    const acc = await Auth.findOne({'code':code})
+    const acc = await Auth.findOne({'email':email})
     console.log(acc.code)
     if(!(acc.code == code)){
         res.status(400).json({
             msg:'Otp is incorrect'
         })
     }
-    console.log(actualCode)
+   
 
     await Auth.findOneAndDelete({'code':code})
     await User.findOneAndUpdate({'email':email}, {'isVerified':true})
