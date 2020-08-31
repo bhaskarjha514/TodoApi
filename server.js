@@ -10,7 +10,7 @@ app.use(express.json({ extended : true }))
 connectDB()
 
 // routes
-app.use('/',(req, res, next=>{
+app.get('/',(req, res, next=>{
     res.status(200).json({
         msg:"home"
     })
