@@ -10,11 +10,7 @@ app.use(express.json({ extended : true }))
 connectDB()
 
 // routes
-app.get('/',(req, res, next=>{
-    res.status(200).json({
-        msg:"home"
-    })
-}))
+
 app.use('/api/todo/auth',require('./routes/user'))
 
 app.listen(PORT , () => console.log(`Server running at ${PORT}`))
