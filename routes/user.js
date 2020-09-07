@@ -17,10 +17,12 @@ router.post('/register',async (req, res, next)=>{
             let checkAuth = await Auth.findOne({'email':email});
             if(checkAuth){
                 res.status(404).json({
+                    success:true,
                     message:"Email Already used! Enter Otp"
                 }) 
             }else{
                 res.status(404).json({
+                    success:false,
                     message:"Email Already used"
                 })
             }
@@ -39,13 +41,13 @@ router.post('/register',async (req, res, next)=>{
                 
             msg = mailer.mailer(email, code)
             if(msg){
-                return res.status(400).json({'message' : 'Cannot Send activation mail ! Check your email and try again'})
+                return res.status(400).json({ success:false ,message : 'Cannot Send activation mail ! Check your email and try again'})
             }
             await user.save(async (err, response) => {
-                if (err) return res.status(400).json({ 'message': 'Server Fucked Up 😑😢' })
+                if (err) return res.status(400).json({ success:false,message: 'Server Fucked Up 😑😢' })
                 await authData.save((err, response) => { 
-                    if (err) return res.status(400).json({'message':'server fucked up'})
-                        return res.status(201).json({'message':'otp has been send to email'})
+                    if (err) return res.status(400).json({success:false,message:'server fucked up'})
+                        return res.status(201).json({success:true,message:'otp has been send to email'})
                     })
                })
         }
@@ -67,11 +69,11 @@ router.get('/verify/', async (req, res) => {
     const acc = await Auth.findOne({'email':email})
    
     if(!(acc.code == code)){
-        return res.status(400).json({message:'otp is incorrect'})
+        return res.status(400).json({success:false,message:'otp is incorrect'})
     }else{
         await Auth.findOneAndDelete({'email':email})
         await User.findOneAndUpdate({'email':email}, {'isVerified':true})
-        return res.status(201).json({'message' : 'Account has verified'})
+        return res.status(201).json({success:true,'message' : 'Account has verified'})
     }
 })
 
