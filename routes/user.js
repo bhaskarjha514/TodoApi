@@ -17,11 +17,11 @@ router.post('/register',async (req, res, next)=>{
             let checkAuth = await Auth.findOne({'email':email});
             if(checkAuth){
                 res.status(404).json({
-                    msg:"Email Already used! Enter Otp"
+                    message:"Email Already used! Enter Otp"
                 }) 
             }else{
                 res.status(404).json({
-                    msg:"Email Already used"
+                    message:"Email Already used"
                 })
             }
            
@@ -54,7 +54,7 @@ router.post('/register',async (req, res, next)=>{
         console.log(err)
         res.status(500).json({
             success: false,
-            msg:'server error'
+            message:'server error'
         })
     }    
 })
@@ -67,7 +67,7 @@ router.get('/verify/', async (req, res) => {
     const acc = await Auth.findOne({'email':email})
    
     if(!(acc.code == code)){
-        return res.status(400).json({msg:'otp is incorrect'})
+        return res.status(400).json({message:'otp is incorrect'})
     }else{
         await Auth.findOneAndDelete({'email':email})
         await User.findOneAndUpdate({'email':email}, {'isVerified':true})
@@ -84,18 +84,18 @@ router.post('/login', async (req, res, next)=>{
         if(!user){
             res.status(400).json({
                 success: false,
-                msg: "Email not Registered"
+                message: "Email not Registered"
             })
         }else{
             const isVerified = await user.isVerified
             if(!isVerified){
-                res.status(400).json({success:false, msg:'Email is not verified'})
+                res.status(400).json({success:false, message:'Email is not verified'})
             }else{
                 const isMatch = await bcryptjs.compare(password,user.password)
                 if(!isMatch){
-                    return res.status(400).json({success:false, msg:'wrong password'})
+                    return res.status(400).json({success:false, message:'wrong password'})
                 }else{
-                    return res.status(201).json({success:true, msg:'successfully login'})
+                    return res.status(201).json({success:true, message:'successfully login'})
                 }
             }
         }
@@ -103,7 +103,7 @@ router.post('/login', async (req, res, next)=>{
         console.log(err)
         res.status(500).json({
             success: false,
-            msg:'server error'
+            message:'server error'
         })
     }
 })
